@@ -72,7 +72,7 @@ chmod +x ./find_brickstorm.sh
 
 **2. Scan an entire directory recursively**: The script will use `find` to scan
 all files within the specified directory. BRICKSTORM has been deployed to a variety of locations on appliances and Mandiant recommends a thorough review of the entire file system.
-**note:** This script will traverse all mounted filesystems. If you are running this script on a device witi large datastore volumes, take care to specify paths that exclude them. 
+**note:** This script will traverse all mounted filesystems. If you are running this script on a device with large datastore volumes, take care to specify paths that exclude them. 
 
 ```
 ./find_brickstorm.sh / > "/tmp/results-vmware-$(date +%F).txt"
