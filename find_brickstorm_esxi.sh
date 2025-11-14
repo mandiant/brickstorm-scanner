@@ -18,6 +18,15 @@
 # Usage: ./find_brickstorm_esxi.sh -o logfile.txt /directory/to/scan/
 
 # --- Definitions ---
+#
+# EXCLUSION LIST: Add paths here to skip during the scan.
+
+# Use space separation. Paths must be the full, absolute path.
+# Examples:
+# EXCLUDE_DIRS="/vmfs/volumes/large_nfs_share /vmfs/volumes/backup_datastore"
+EXCLUDE_DIRS="/root/excludeme"
+#
+# 2. PATTERNS
 HEX_PATTERN="488b05.{8}48890424e8.{8}48b8.{16}48890424.{0,10}e8.{8}eb.{2}"
 LONG_NUM="115792089210356248762697446949407573529996955224135760342422259061068512044369115792089210356248762697446949407573530086143415290314195533631308867097853951"
 LOG_FILE=""
@@ -92,19 +101,21 @@ echo "Starting scan on ESXi host. This may be slow."
 echo "Targets: $@"
 COUNT=0
 
-# Scan only files (-type f), attempt to skip huge files (-size -50000k = roughly 50MB limit to be safe on ESXi)
-    find "$@" -type f -size -50000k 2>/dev/null | while read -r FILE; do
-    # Basic manual exclusions for safety if user scanned root '/'
-    case "$FILE" in
-        /proc/*|/dev/*|/sys/*) continue ;;
-    esac
+
+GREP_EXCLUDE_PATTERN=$(echo "$EXCLUDE_DIRS" | sed 's/ /|/g')
+# The pattern will look like: /root/excludeme|/proc|/dev|/sys
+
+FIND_COMMAND="find "$@" -type f -size -50000k"
+
+$FIND_COMMAND | grep -E -v "^($GREP_EXCLUDE_PATTERN)" | while read -r FILE; do
+    
     check_file "$FILE"
     COUNT=$((COUNT + 1))
     if [ $((COUNT % 100)) -eq 0 ]; then
         # Print to stderr so it doesn't mess up piped output if you use it later
         printf "Scanned %d files...\r" "$COUNT" >&2
     fi
-    done
+done
 
 echo ""
 echo "Scan complete."
