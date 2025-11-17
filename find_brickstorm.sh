@@ -156,43 +156,43 @@ check_file() {
     # $str2 "regex"
     str2="regex"
     str2_wide=$(build_wide_pattern "$str2")
-    if ! grep -iaPq "$str2|$str2_wide" "$file"; then return; fi
+    if ! grep -iaEq "$str2|$str2_wide" "$file"; then return; fi
 
     # $str3 "mime"
     str3="mime"
     str3_wide=$(build_wide_pattern "$str3")
-    if ! grep -iaPq "$str3|$str3_wide" "$file"; then return; fi
+    if ! grep -iaEq "$str3|$str3_wide" "$file"; then return; fi
 
     # $str4 "decompress"
     str4="decompress"
     str4_wide=$(build_wide_pattern "$str4")
-    if ! grep -iaPq "$str4|$str4_wide" "$file"; then return; fi
+    if ! grep -iaEq "$str4|$str4_wide" "$file"; then return; fi
 
     # $str5 "MIMEHeader"
     str5="MIMEHeader"
     str5_wide=$(build_wide_pattern "$str5")
-    if ! grep -iaPq "$str5|$str5_wide" "$file"; then return; fi
+    if ! grep -iaEq "$str5|$str5_wide" "$file"; then return; fi
 
     # $str6 "ResolveReference"
     str6="ResolveReference"
     str6_wide=$(build_wide_pattern "$str6")
-    if ! grep -iaPq "$str6|$str6_wide" "$file"; then return; fi
+    if ! grep -iaEq "$str6|$str6_wide" "$file"; then return; fi
     
     # $str7 (long_num)
     str7_wide=$(build_wide_pattern "$long_num")
     # -i is fine, even though it's numbers
-    if ! grep -iaPq "$long_num|$str7_wide" "$file"; then return; fi
+    if ! grep -iaEq "$long_num|$str7_wide" "$file"; then return; fi
 
     # --- Condition 3: Check for hex string ($str1) ---
     # This is the most expensive check. We hex-dump the entire file,
     # remove newlines, and grep the resulting single line of hex.
-    # We use grep -Pq for Perl-compatible regex to support (..){0,5}
+    # We use grep -Eq for Extended regex to support (..){0,5}
     if command -v xxd >/dev/null 2>&1; then
-        if ! xxd -p "$file" 2>/dev/null | tr -d '\n' | grep -Pq "$hex_pattern"; then
+        if ! xxd -p "$file" 2>/dev/null | tr -d '\n' | grep -Eq "$hex_pattern"; then
             return
         fi
     else
-        if ! hexdump -v -e '/1 "%02x"' "$file" 2>/dev/null | grep -Pq "$hex_pattern"; then
+        if ! hexdump -v -e '/1 "%02x"' "$file" 2>/dev/null | grep -Eq "$hex_pattern"; then
             return
         fi
     fi
